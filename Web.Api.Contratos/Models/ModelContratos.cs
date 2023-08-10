@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Web.Api.Contratos.Models
 {
@@ -7,6 +8,7 @@ namespace Web.Api.Contratos.Models
     {
         public string Nome { get; set; }
         public string Cpf { get; set; }
+        [Key]
         public int Contrato { get; set; }
         public string Produto { get; set; }
         public DateTime Vencimento { get; set; }
