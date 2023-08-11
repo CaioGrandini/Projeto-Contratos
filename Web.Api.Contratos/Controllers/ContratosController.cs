@@ -4,8 +4,6 @@ using Web.Api.Contratos.Context;
 using Web.Api.Contratos.Models;
 using Web.Api.Contratos.Services;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Web.Api.Contratos.Controllers
 {
     [Route("api/[controller]")]

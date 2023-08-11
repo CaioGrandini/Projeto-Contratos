@@ -24,9 +24,9 @@ namespace Web.Api.Contratos.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_contratos", x => x.Contrato);
+
                 });
         }
-
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
