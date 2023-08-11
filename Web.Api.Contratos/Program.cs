@@ -13,8 +13,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 
 //configuracao da connection string
-string Sql = builder.Configuration.GetConnectionString("WebApiDatabase");
-builder.Services.AddDbContext<MyDbContext>(options => options.UseSqlServer(Sql));
+builder.Services.AddDbContext<MyDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("WebApiDatabase"));
+});
+
+//adicionando configuracao do identity
+builder.Services.AddIdentityConfig(builder.Configuration);
+
 builder.Services.AddSwaggerGen();
 
 builder.Services.ResolveDependencies();
@@ -22,14 +28,15 @@ builder.Services.ResolveDependencies();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-/*if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}*/
+}
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
