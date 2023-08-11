@@ -3,8 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Web.Api.Contratos.Models
 {
-    [Table("Produto")]
-    public class ModelContratos
+    public class ModelContratosCSV
     {
         public string Nome { get; set; }
         public string Cpf { get; set; }

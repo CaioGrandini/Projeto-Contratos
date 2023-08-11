@@ -12,6 +12,6 @@ namespace Web.Api.Contratos.Context
             ChangeTracker.AutoDetectChangesEnabled = true;
         }
 
-       public DbSet<ModelContratos> Contratos { get; set; }
+       public DbSet<ModelContratosCSV> contratos { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Web.Api.Contratos.Context;
 using Web.Api.Contratos.Models;
+using Web.Api.Contratos.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,24 +13,26 @@ namespace Web.Api.Contratos.Controllers
     public class ContratosController : ControllerBase
     {
         private readonly MyDbContext _context;
+        private readonly CsvServices _csvservice;
 
-        public ContratosController(MyDbContext context)
+        public ContratosController(MyDbContext context, CsvServices csvservice)
         {
             _context = context;
+            _csvservice = csvservice;
         }
 
         // GET: api/<ContratosController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ModelContratos>>> Get()
+        public async Task<ActionResult<IEnumerable<ModelContratosCSV>>> Get()
         {
-            return await _context.Contratos.ToListAsync();
+            return await _context.contratos.ToListAsync();
         }
 
         // GET api/<ContratosController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ModelContratos>> Get([FromRoute] int number)
+        public async Task<ActionResult<ModelContratosCSV>> Get([FromRoute] int number)
         {
-            var registerExist = _context.Contratos.FirstOrDefault(x => x.Contrato == number);
+            var registerExist = _context.contratos.FirstOrDefault(x => x.Contrato == number);
 
             if (registerExist == null)
             {
@@ -41,10 +44,18 @@ namespace Web.Api.Contratos.Controllers
 
         // POST api/<ContratosController>
         [HttpPost]
-        public async Task<ActionResult<ModelContratos>> Post([FromBody] string value)
+        public async Task<ActionResult<ModelContratosCSV>> Post()
         {
 
             return Ok();
+        }
+
+        //post do arquivo CSV
+        [HttpPost]
+        public IActionResult CsvImport([FromBody] string CsvPath)
+        {
+            _csvservice.ImportCsv(CsvPath);
+            return Ok("Arquivo importado com sucesso.");
         }
 
         // PUT api/<ContratosController>/5
@@ -55,15 +66,15 @@ namespace Web.Api.Contratos.Controllers
 
         // DELETE api/<ContratosController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ModelContratos>> Delete([FromRoute] int id)
+        public async Task<ActionResult<ModelContratosCSV>> Delete([FromRoute] int id)
         {
-            var registerExist = await _context.Contratos.FindAsync(id);
+            var registerExist = await _context.contratos.FindAsync(id);
             if (registerExist == null)
             {
                 return NotFound(id);
             }
 
-            _context.Contratos.Remove(registerExist);
+            _context.contratos.Remove(registerExist);
             await _context.SaveChangesAsync();
 
             return NoContent();
