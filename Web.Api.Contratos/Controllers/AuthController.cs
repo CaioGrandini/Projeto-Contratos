@@ -45,7 +45,7 @@ namespace Web.Api.Contratos.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return CustomResponse(GerarJwt());
+                return CustomResponse(await GerarJwt(registerUser.Email));
             }
             foreach(var error in result.Errors)
             {
@@ -61,7 +61,7 @@ namespace Web.Api.Contratos.Controllers
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
             if (result.Succeeded)
             {
-                return CustomResponse(GerarJwt());
+                return CustomResponse(await GerarJwt(loginUser.Email));
             }
             if (result.IsLockedOut)
             {
@@ -72,14 +72,19 @@ namespace Web.Api.Contratos.Controllers
             return CustomResponse(loginUser);
         }
 
-        private string GerarJwt()
+        private async Task<LoginResponseViewModel> GerarJwt(string email)
         { 
-
+            var user = await _userManager.FindByNameAsync(email);
             //
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
+                Subject = new ClaimsIdentity(
+                    new Claim[]
+                    {
+                        new Claim(ClaimTypes.Email, email)
+                    }),
                 Issuer = _appSettings.Emissor,
                 Audience = _appSettings.ValidoEm,
                 Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
@@ -88,7 +93,18 @@ namespace Web.Api.Contratos.Controllers
 
             //
             var encondedToken = tokenHandler.WriteToken(token);
-            return encondedToken;
+            var response = new LoginResponseViewModel
+            {
+                AccessToken = encondedToken,
+                ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
+                UserToken = new UserTokenViewModel
+                {
+                    ID = user.Id,
+                    Email = user.Email
+                }
+            };
+
+            return response;
         }
     }
 }

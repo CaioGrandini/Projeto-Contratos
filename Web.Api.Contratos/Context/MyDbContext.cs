@@ -13,5 +13,6 @@ namespace Web.Api.Contratos.Context
         }
 
        public DbSet<ModelContratosCSV> contratos { get; set; }
+       public DbSet<ModelArquivos> arquivos { get; set; }
     }
 }

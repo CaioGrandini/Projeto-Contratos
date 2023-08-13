@@ -29,7 +29,7 @@ namespace Web.Api.Contratos.ViewModel
     {
         public string ID { get; set; }
         public string Email { get; set; }
-        public IEnumerable<ClaimViewModel> Claims { get; set; }
+        //public IEnumerable<ClaimViewModel> Claims { get; set; }
     }
 
     public class LoginResponseViewModel
@@ -40,9 +40,9 @@ namespace Web.Api.Contratos.ViewModel
 
     }
 
-    public class ClaimViewModel
+   /* public class ClaimViewModel
     {
         public string Value { get; set; }
         public string Type { get; set; }
-    }
+    }*/
 }
