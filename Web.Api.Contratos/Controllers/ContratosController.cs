@@ -44,7 +44,7 @@ namespace Web.Api.Contratos.Controllers
         // GET api/<ContratosController>/5
         [HttpGet("{number}")]
         public async Task<ActionResult<ContratoUsuarioViewModel>> Get([FromRoute] string number)
-        {
+         {
             var registerExist = _context.contratos.Where(x => x.CPF == number);
 
             if (registerExist == null)
@@ -67,42 +67,12 @@ namespace Web.Api.Contratos.Controllers
             }
             var contratoUsuario = new ContratoUsuarioViewModel
             {
+                //Sum -> comando para somar todos os valores
                 Valor = registerExist.Sum(x => x.Valor),
                 Atraso = atraso
             };
 
-
             return contratoUsuario;
-        }
-
-        // POST api/<ContratosController>
-        [HttpPost]
-        public async Task<ActionResult<ModelContratosCSV>> Post([FromBody] ModelContratosCSV modelContratos)
-        {
-            var registerExist = _context.contratos.FirstOrDefault(c => c.Contrato == modelContratos.Contrato);
-            if (registerExist != null)
-            {
-                return CreatedAtAction("Get", new { Contrato = modelContratos.Contrato }, registerExist);
-            }
-            else
-            {
-                var registroContrato = new ModelContratosCSV
-                {
-                    Nome = modelContratos.Nome,
-                    CPF = modelContratos.CPF,
-                    Contrato = modelContratos.Contrato,
-                    Produto = modelContratos.Produto,
-                    Vencimento = modelContratos.Vencimento,
-                    Valor = modelContratos.Valor,
-                };
-                _context.contratos.Add(registroContrato);
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    success = true,
-                });
-            }
         }
 
         [HttpPost("csv")]
@@ -112,33 +82,28 @@ namespace Web.Api.Contratos.Controllers
             if (file == null || file.Length <= 0)
                 return BadRequest("Nenhum arquivo foi enviado.");
 
-            // Lógica para processar o arquivo (por exemplo, salvar no disco)
-            //_csvservice.ImportCsv();
-
             try
             {
-
+                //para pegar os valores em virgula 
                 var configuration = new CsvConfiguration(new CultureInfo("pt-BR"))
                 {
-                    Encoding = Encoding.GetEncoding("iso-8859-1"), // Our file uses UTF-8 encoding.
-                    Delimiter = ";", // The delimiter is a comma.
+                    //para pegar acentuacao correta
+                    Encoding = Encoding.GetEncoding("iso-8859-1"), 
+                    Delimiter = ";",
 
                 };
                 List<ModelContratosCSV> registros;
                 using (var stream = new StreamReader(file.OpenReadStream(), Encoding.GetEncoding("iso-8859-1")))
                 using (var csvReader = new CsvReader(stream, configuration))
                 {
-
                     csvReader.Read();
                     csvReader.ReadHeader();
-                    //csvReader.Context.RegisterClassMap<ModelContratosCSVMapper>();
 
                     registros = csvReader.GetRecords<ModelContratosCSV>().ToList();
 
                     // Registrar os registros no banco de dados
                     _context.contratos.AddRange(registros);
                     await _context.SaveChangesAsync();
-
 
                 }
                 var arquivo = new ModelArquivos
