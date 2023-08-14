@@ -32,8 +32,10 @@ namespace Web.Api.Contratos.Controllers
         [HttpPost("nova-conta")]
         public async Task<ActionResult> Registrar([FromBody] RegisterUserViewModel registerUser)
         {
+            //Validamos a modelState
             if(!ModelState.IsValid) return CustomResponse(ModelState);
 
+            //Setamos a indentificacao no banco.
             var user = new IdentityUser
             {
                 UserName = registerUser.Email,
@@ -41,10 +43,13 @@ namespace Web.Api.Contratos.Controllers
                 EmailConfirmed = true
             };
 
+            //criamos o usuario e retornamos;
             var result = await _userManager.CreateAsync(user, registerUser.Password);
             if (result.Succeeded)
             {
+                // O mesmo nao é persistente
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                //geramos o JWT
                 return CustomResponse(await GerarJwt(registerUser.Email));
             }
             foreach(var error in result.Errors)
@@ -56,13 +61,15 @@ namespace Web.Api.Contratos.Controllers
 
         [HttpPost("entrar")]
         public async Task<ActionResult> Login([FromBody] LoginUserViewModel loginUser)
-        {
+        {    
+            //Validamos a modelState
             if (!ModelState.IsValid) return CustomResponse(ModelState);
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
             if (result.Succeeded)
             {
                 return CustomResponse(await GerarJwt(loginUser.Email));
             }
+            //if result.IsLockedOut > 5, o usuario é bloqueado temporariamente.
             if (result.IsLockedOut)
             {
                 NotificarErro("Usuário temporariamente bloqueado por tentativas inválidas");
@@ -72,14 +79,15 @@ namespace Web.Api.Contratos.Controllers
             return CustomResponse(loginUser);
         }
 
+        //Será gerado o token e retornado para o usuario.
         private async Task<LoginResponseViewModel> GerarJwt(string email)
         { 
             var user = await _userManager.FindByNameAsync(email);
-            //
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
+                //Retornamos o Email dentro do Token junto com algumas outras informações.
                 Subject = new ClaimsIdentity(
                     new Claim[]
                     {
@@ -91,7 +99,7 @@ namespace Web.Api.Contratos.Controllers
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             });
 
-            //
+            //Logamos o user
             var encondedToken = tokenHandler.WriteToken(token);
             var response = new LoginResponseViewModel
             {

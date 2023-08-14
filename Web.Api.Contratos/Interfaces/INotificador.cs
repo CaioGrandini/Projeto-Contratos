@@ -2,6 +2,8 @@
 
 namespace Web.Api.Contratos.Interfaces
 {
+    //Interface para obter notificacoes.
+    //A mesma é injetada na controller main
     public interface INotificador
     {
         bool TemNotificacao();

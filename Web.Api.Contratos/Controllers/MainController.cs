@@ -6,6 +6,9 @@ namespace Web.Api.Contratos.Controllers
 {
     public class MainController : ControllerBase
     {
+
+        //Criamos uma controller para receber notificações de erros.
+
         private readonly INotificador _notificador;
 
         private readonly IUser AppUser;

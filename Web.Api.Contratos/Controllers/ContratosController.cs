@@ -28,6 +28,7 @@ namespace Web.Api.Contratos.Controllers
         }
 
         // GET: api/<ContratosController>
+        //Get da base importada para o banco.
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ModelContratosCSV>>> Get()
         {
@@ -52,8 +53,9 @@ namespace Web.Api.Contratos.Controllers
                 return NotFound();
             }
 
+            //logica para saber o valor total dos contratos referente ao CPF
+            //E o maior atraso em dia.
             int atraso = 0;
-
             foreach (var item in registerExist)
             {
                 var dataregistro = Convert.ToDateTime(item.Vencimento);
@@ -65,6 +67,7 @@ namespace Web.Api.Contratos.Controllers
                     atraso = dias;
                 }
             }
+            //retornando os valores somados junto com os dias de atraso.
             var contratoUsuario = new ContratoUsuarioViewModel
             {
                 //Sum -> comando para somar todos os valores
@@ -92,6 +95,7 @@ namespace Web.Api.Contratos.Controllers
                     Delimiter = ";",
 
                 };
+                //Stremando e adicionando a Iso-8859-1 para acentuacao correta
                 List<ModelContratosCSV> registros;
                 using (var stream = new StreamReader(file.OpenReadStream(), Encoding.GetEncoding("iso-8859-1")))
                 using (var csvReader = new CsvReader(stream, configuration))
@@ -106,12 +110,16 @@ namespace Web.Api.Contratos.Controllers
                     await _context.SaveChangesAsync();
 
                 }
+
+                //Através da ClaimType.Email conseguimos saber o usuario que fez a importação do arquivo
+                //O arquivo é retornado junto com o Id do banco e o usuario.
                 var arquivo = new ModelArquivos
                 {
                     Nome = file.FileName,
                     EmailUsuario = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value,
                 };
 
+                //salvamos no banco.
                 _context.arquivos.AddRange(arquivo);
                 await _context.SaveChangesAsync();
 
